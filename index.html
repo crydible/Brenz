@@ -109,7 +109,7 @@
 
       <!-- KOLOM INPUT DAN TOMBOL -->
       <div class="search-box">
-        <input type="text" id="cariInput" class="input-rute" placeholder="masukkan rute" />
+        <input type="text" id="cariInput" class="input-rute" placeholder="cari rute/hari disini" />
         <button id="tombolCari" class="tombol-cari">cari</button>
       </div>
 
@@ -135,11 +135,11 @@
                 const kataKunci = inputKetik.value.toLowerCase().trim();
 
                 if (kataKunci === "") {
-                    alert("Ketik nama rute atau hari dulu, Fer!");
+                    alert("masukkan hari/rute untuk di cari");
                     return;
                 }
                 
-                infoLoading.innerHTML = "<p class='text-center'>Sedang mencari rute...</p>";
+                infoLoading.innerHTML = "<p class='text-center'>Sedang mencari,harap bersabar,...</p>";
                 
                 fetch(urlData, { method: "GET", redirect: "follow" })
                     .then(response => response.json())
@@ -157,7 +157,7 @@
                             html += "</ul>";
                             infoLoading.innerHTML = html;
                         } else {
-                            infoLoading.innerHTML = "<p class='text-center' style='color:#b22222;'>Rute gak ketemu, Fer. Coba cek lagi.</p>";
+                            infoLoading.innerHTML = "<p class='text-center' style='color:#b22222;'>ga ketemu,seng genah inputnya</p>";
                         }
                     })
                     .catch(err => {
