@@ -2,7 +2,7 @@
 <html lang="id">
   <head>
     <meta charset="utf-8" />
-    <title>Pencarian Rute</title>
+    <title>Pencarian Rute Pintar</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
@@ -22,7 +22,6 @@
         position: relative;
       }
 
-      /* CONTAINER BACKGROUND PARTIKEL */
       #tsparticles {
         position: absolute;
         width: 100%;
@@ -39,10 +38,9 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        z-index: 2; /* Biar di depan partikel */
+        z-index: 2;
       }
 
-      /* JUDUL DENGAN ANIMASI TERGULING/MASUK */
       .judul-kotak {
         background-color: #009999;
         padding: 8px 20px;
@@ -57,7 +55,6 @@
         letter-spacing: 1px;
       }
 
-      /* KOTAK SEARCH DENGAN EFEK TRANSISI HALUS */
       .search-box {
         display: flex;
         width: 100%;
@@ -84,7 +81,6 @@
         outline: none;
       }
 
-      /* TOMBOL DENGAN EFEK HOVER DAN KLIK */
       .tombol-cari {
         background: linear-gradient(135deg, #3b66de 0%, #254bba 100%);
         color: #ffffff;
@@ -109,7 +105,6 @@
         text-shadow: 0 2px 4px rgba(0,0,0,0.2);
       }
 
-      /* BOX HASIL SEKARANG GLASSMORPHISM TRANSPARAN BIAR MODERN */
       .box-hasil {
         width: 100%;
         aspect-ratio: 1 / 1;
@@ -122,10 +117,8 @@
         padding: 20px;
         overflow-y: auto;
         box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-        transition: all 0.4s ease;
       }
 
-      /* ANIMASI LIST BIAR MUNCUL SATU PER SATU */
       .list-rute-item {
         background: rgba(255, 255, 255, 0.9);
         padding: 12px 16px;
@@ -137,6 +130,17 @@
         animation: fadeInUp 0.5s ease forwards;
       }
 
+      .tag-minggu {
+        display: inline-block;
+        font-size: 11px;
+        background-color: #008080;
+        color: #fff;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-top: 4px;
+        font-weight: 600;
+      }
+
       .text-center {
         text-align: center;
         margin: 0;
@@ -144,7 +148,6 @@
         font-weight: 500;
       }
 
-      /* ANIMASI ROTASI LOADING SPREAD */
       .spinner {
         width: 40px;
         height: 40px;
@@ -172,14 +175,14 @@
       <div class="judul-kotak animate__animated animate__jackInTheBox">pencarian rute</div>
 
       <div class="search-box animate__animated animate__fadeInUp">
-        <input type="text" id="cariInput" class="input-rute" placeholder="cari rute/hari disini" />
+        <input type="text" id="cariInput" class="input-rute" placeholder="Contoh: senin mggu 1 / senin 24" />
         <button id="tombolCari" class="tombol-cari">cari</button>
       </div>
 
       <div class="label-hasil animate__animated animate__fadeIn">hasil</div>
 
       <div id="loadingRute" class="box-hasil animate__animated animate__fadeInUp">
-        <p class="text-center" style="opacity: 0.7;">Hasil pencarian kamu bakal muncul di sini...</p>
+        <p class="text-center" style="opacity: 0.7;">Hasil pencarian pintar kamu bakal muncul di sini...</p>
       </div>
     </div>
 
@@ -188,7 +191,6 @@
 
     <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // KONFIGURASI BACKGROUND PARTIKEL JARING-JARING
         tsParticles.load("tsparticles", {
           particles: {
             number: { value: 40, density: { enable: true, value_area: 800 } },
@@ -200,6 +202,17 @@
           }
         });
 
+        // FUNGSI PENERJEMAH MINGGU & FORMAT TAMPILAN
+        function formatHariKeren(hariRaw) {
+            let namaHari = hariRaw.replace(/[0-9]/g, '').trim();
+            if (hariRaw.includes('13')) {
+                return `Hari ${namaHari.toUpperCase()} <br><span class="tag-minggu">Minggu 1 & 3</span>`;
+            } else if (hariRaw.includes('24')) {
+                return `Hari ${namaHari.toUpperCase()} <br><span class="tag-minggu">Minggu 2 & 4</span>`;
+            }
+            return `Hari ${hariRaw.toUpperCase()}`;
+        }
+
         const tombol = document.getElementById('tombolCari');
         const inputKetik = document.getElementById('cariInput');
         const infoLoading = document.getElementById('loadingRute'); 
@@ -209,41 +222,62 @@
             tombol.addEventListener('click', (e) => {
                 e.preventDefault(); 
 
-                const kataKunci = inputKetik.value.toLowerCase().trim();
+                let kataKunci = inputKetik.value.toLowerCase().trim();
 
                 if (kataKunci === "") {
                     alert("masukkan hari/rute untuk di cari");
                     return;
                 }
                 
-                // ANIMASI LOADING SPINNER BARU
                 infoLoading.innerHTML = `
                   <div class="spinner"></div>
-                  <p class='text-center'>Sedang mencari data rute...</p>
+                  <p class='text-center'>Sedang mencari rute terbaik...</p>
                 `;
                 
                 fetch(urlData, { method: "GET", redirect: "follow" })
                     .then(response => response.json())
                     .then(data => {
                         const hasilFilter = data.filter(item => {
-                            return item.hari.toLowerCase().includes(kataKunci) || 
-                                   item.rute.toLowerCase().includes(kataKunci);
+                            let hariData = item.hari.toLowerCase();
+                            let ruteData = item.rute.toLowerCase();
+
+                            // JIKA TEMPAT KETIK ADA KATA 'MINGGU' ATAU 'MGGU'
+                            if (kataKunci.includes("minggu") || kataKunci.includes("mggu") || kataKunci.includes("mgu")) {
+                                let hariSaja = kataKunci.replace(/(minggu|mggu|mgu|\s)/g, '').replace(/[0-9]/g, '');
+                                let angkaMinggu = kataKunci.match(/[1-4]/); 
+                                
+                                if (angkaMinggu) {
+                                    let digit = angkaMinggu[0];
+                                    // COCOKKAN LOGIKA APALAKAH INPUT 1 ATAU 3 COCOK DENGAN DATA '13'
+                                    if ((digit === "1" || digit === "3") && hariData.includes(hariSaja) && hariData.includes("13")) return true;
+                                    if ((digit === "2" || digit === "4") && hariData.includes(hariSaja) && hariData.includes("24")) return true;
+                                }
+                            }
+
+                            // JIKA USER KETIK FORMAT SINGKAT MISAL: 'senin 1', 'senin 3'
+                            let formatSingkat = kataKunci.match(/^([a-z]+)\s*([1-4])$/);
+                            if (formatSingkat) {
+                                let hariSaja = formatSingkat[1];
+                                let digit = formatSingkat[2];
+                                if ((digit === "1" || digit === "3") && hariData.includes(hariSaja) && hariData.includes("13")) return true;
+                                if ((digit === "2" || digit === "4") && hariData.includes(hariSaja) && hariData.includes("24")) return true;
+                            }
+
+                            // PENCARIAN STANDAR (Biar kalau ketik 'senin' atau nama rute tetep jalan)
+                            return hariData.includes(kataKunci) || ruteData.includes(kataKunci);
                         });
 
                         if (hasilFilter.length > 0) {
                             let html = "<ul style='margin:0; padding:0;'>";
                             hasilFilter.forEach((item, index) => {
-                                // Ditambahkan inline style delay biar munculnya gantian estetik
                                 html += `<li class="list-rute-item" style="animation-delay: ${index * 0.1}s">
-                                          Hari <strong>${item.hari}</strong>: ${item.rute}
+                                          ${formatHariKeren(item.hari)}: <span style="font-weight:500;">${item.rute}</span>
                                          </li>`;
                             });
                             html += "</ul>";
                             infoLoading.innerHTML = html;
                             
-                            // EFEK CONFETTI BONUS KALAU JAWABAN KETEMU!
                             confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 } });
-
                         } else {
                             infoLoading.innerHTML = "<p class='text-center' style='color:#ffbcbc; font-weight: bold;'>ga ketemu, seng genah inputnya</p>";
                         }
