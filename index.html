@@ -3,126 +3,203 @@
   <head>
     <meta charset="utf-8" />
     <title>Pencarian Rute</title>
-    <!-- BIAR RESPONSIVE DAN PAS DI LAYAR HP -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
     <style>
-      /* BACKGROUND GRADIENT PERSIS SEPERTI GAMBAR */
       body {
         background: radial-gradient(circle, #00b4b4 0%, #006666 100%);
         margin: 0;
         padding: 20px 16px;
-        font-family: 'Arial Black', Gadget, sans-serif; /* Biar font agak tebal mirip gambar */
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         display: flex;
         flex-direction: column;
         align-items: center;
         min-height: 100vh;
         box-sizing: border-box;
+        overflow-x: hidden;
+        position: relative;
       }
 
-      /* CONTAINER UTAMA HP */
+      /* CONTAINER BACKGROUND PARTIKEL */
+      #tsparticles {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        pointer-events: none;
+      }
+
       .main-container {
         width: 100%;
-        max-width: 360px;
+        max-width: 380px;
         display: flex;
         flex-direction: column;
         align-items: center;
+        z-index: 2; /* Biar di depan partikel */
       }
 
-      /* JUDUL ATAS */
+      /* JUDUL DENGAN ANIMASI TERGULING/MASUK */
       .judul-kotak {
         background-color: #009999;
-        padding: 6px 16px;
-        color: #000000;
-        font-size: 20px;
+        padding: 8px 20px;
+        color: #ffffff;
+        font-size: 22px;
+        font-weight: 800;
         text-transform: lowercase;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin-bottom: 50px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        margin-bottom: 40px;
         margin-top: 10px;
+        border-radius: 8px;
+        letter-spacing: 1px;
       }
 
-      /* BARISAN INPUT DAN TOMBOL (BERGANDENGAN) */
+      /* KOTAK SEARCH DENGAN EFEK TRANSISI HALUS */
       .search-box {
         display: flex;
         width: 100%;
-        height: 42px;
+        height: 46px;
         margin-bottom: 25px;
+        border-radius: 25px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      
+      .search-box:focus-within {
+        transform: scale(1.02);
+        box-shadow: 0 6px 20px rgba(0,180,180,0.4);
       }
 
       .input-rute {
         flex: 1;
         border: none;
-        padding: 0 12px;
-        font-size: 16px;
-        color: #7f7f7f;
+        padding: 0 20px;
+        font-size: 15px;
+        color: #333;
         background-color: #ffffff;
         outline: none;
-        font-family: inherit;
       }
 
+      /* TOMBOL DENGAN EFEK HOVER DAN KLIK */
       .tombol-cari {
-        background-color: #3b66de;
+        background: linear-gradient(135deg, #3b66de 0%, #254bba 100%);
         color: #ffffff;
         border: none;
-        padding: 0 16px;
-        font-size: 16px;
+        padding: 0 22px;
+        font-size: 15px;
+        font-weight: bold;
         cursor: pointer;
-        font-family: inherit;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        transition: background 0.3s ease, transform 0.1s ease;
       }
 
-      /* TULISAN HASIL */
+      .tombol-cari:active {
+        transform: scale(0.95);
+      }
+
       .label-hasil {
-        color: #000000;
-        font-size: 20px;
-        margin-bottom: 10px;
+        color: #ffffff;
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 12px;
         text-transform: lowercase;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
       }
 
-      /* KOTAK ABU-ABU BESAR UNTUK HASIL */
+      /* BOX HASIL SEKARANG GLASSMORPHISM TRANSPARAN BIAR MODERN */
       .box-hasil {
         width: 100%;
-        aspect-ratio: 1 / 1; /* Biar bentuknya kotak persegi persis gambar */
-        background-color: #b3b3b3;
+        aspect-ratio: 1 / 1;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
         box-sizing: border-box;
-        padding: 16px;
+        padding: 20px;
         overflow-y: auto;
-        font-family: sans-serif; /* Biar list rutenya tetap rapi dibaca */
-        font-weight: normal;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        transition: all 0.4s ease;
+      }
+
+      /* ANIMASI LIST BIAR MUNCUL SATU PER SATU */
+      .list-rute-item {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 12px 16px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        list-style: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        color: #222;
+        animation: fadeInUp 0.5s ease forwards;
       }
 
       .text-center {
         text-align: center;
         margin: 0;
-        color: #333;
+        color: #fff;
+        font-weight: 500;
+      }
+
+      /* ANIMASI ROTASI LOADING SPREAD */
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        margin: 20px auto 10px auto;
+        animation: spin 1s ease-in-out infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
       }
     </style>
   </head>
   <body>
 
-    <div class="main-container">
-      <!-- JUDUL -->
-      <div class="judul-kotak">pencarian rute</div>
+    <div id="tsparticles"></div>
 
-      <!-- KOLOM INPUT DAN TOMBOL -->
-      <div class="search-box">
+    <div class="main-container">
+      <div class="judul-kotak animate__animated animate__jackInTheBox">pencarian rute</div>
+
+      <div class="search-box animate__animated animate__fadeInUp">
         <input type="text" id="cariInput" class="input-rute" placeholder="cari rute/hari disini" />
         <button id="tombolCari" class="tombol-cari">cari</button>
       </div>
 
-      <!-- TULISAN HASIL -->
-      <div class="label-hasil">hasil</div>
+      <div class="label-hasil animate__animated animate__fadeIn">hasil</div>
 
-      <!-- KOTAK ABU-ABU TEMPAT KELUAR DATA -->
-      <div id="loadingRute" class="box-hasil"></div>
+      <div id="loadingRute" class="box-hasil animate__animated animate__fadeInUp">
+        <p class="text-center" style="opacity: 0.7;">Hasil pencarian kamu bakal muncul di sini...</p>
+      </div>
     </div>
 
-    <!-- SCRIPT OTAK PENCARIAN -->
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-confetti@2.12.0/tsparticles.confetti.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tsparticles/2.12.0/tsparticles.bundle.min.js"></script>
+
     <script>
     document.addEventListener("DOMContentLoaded", function() {
+        // KONFIGURASI BACKGROUND PARTIKEL JARING-JARING
+        tsParticles.load("tsparticles", {
+          particles: {
+            number: { value: 40, density: { enable: true, value_area: 800 } },
+            color: { value: "#ffffff" },
+            opacity: { value: 0.3 },
+            size: { value: 3 },
+            line_linked: { enable: true, distance: 150, color: "#ffffff", opacity: 0.2, width: 1 },
+            move: { enable: true, speed: 1.5, direction: "none", random: false, straight: false, out_mode: "out" }
+          }
+        });
+
         const tombol = document.getElementById('tombolCari');
         const inputKetik = document.getElementById('cariInput');
         const infoLoading = document.getElementById('loadingRute'); 
@@ -139,7 +216,11 @@
                     return;
                 }
                 
-                infoLoading.innerHTML = "<p class='text-center'>Sedang mencari,harap bersabar,...</p>";
+                // ANIMASI LOADING SPINNER BARU
+                infoLoading.innerHTML = `
+                  <div class="spinner"></div>
+                  <p class='text-center'>Sedang mencari data rute...</p>
+                `;
                 
                 fetch(urlData, { method: "GET", redirect: "follow" })
                     .then(response => response.json())
@@ -150,19 +231,26 @@
                         });
 
                         if (hasilFilter.length > 0) {
-                            let html = "<ul style='margin:0; padding-left:20px; color:#111; line-height: 1.6; font-size:16px;'>";
-                            hasilFilter.forEach(item => {
-                                html += `<li style='margin-bottom:10px;'>Hari <strong>${item.hari}</strong>: ${item.rute}</li>`;
+                            let html = "<ul style='margin:0; padding:0;'>";
+                            hasilFilter.forEach((item, index) => {
+                                // Ditambahkan inline style delay biar munculnya gantian estetik
+                                html += `<li class="list-rute-item" style="animation-delay: ${index * 0.1}s">
+                                          Hari <strong>${item.hari}</strong>: ${item.rute}
+                                         </li>`;
                             });
                             html += "</ul>";
                             infoLoading.innerHTML = html;
+                            
+                            // EFEK CONFETTI BONUS KALAU JAWABAN KETEMU!
+                            confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 } });
+
                         } else {
-                            infoLoading.innerHTML = "<p class='text-center' style='color:#b22222;'>ga ketemu,seng genah inputnya</p>";
+                            infoLoading.innerHTML = "<p class='text-center' style='color:#ffbcbc; font-weight: bold;'>ga ketemu, seng genah inputnya</p>";
                         }
                     })
                     .catch(err => {
                         console.error(err);
-                        infoLoading.innerHTML = "<p class='text-center' style='color:#b22222;'>Gagal memuat data.</p>";
+                        infoLoading.innerHTML = "<p class='text-center' style='color:#ffbcbc;'>Gagal memuat data.</p>";
                     });
             });
         }
